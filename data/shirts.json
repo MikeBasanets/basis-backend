@@ -1,0 +1,20 @@
+[
+    {
+        "page": "https://www.lamoda.by/p/rtlaaq823101/clothes-fredperry-rubashka/",
+        "image": "https://a.lmcdn.ru/img600x866/R/T/RTLAAQ823101_15099469_1_v1_2x.jpg",
+        "style": "oxford_cloth_button_down_shirt",
+        "colors": [
+            "white"
+        ],
+        "fit": "regular"
+    },
+    {
+        "page": "https://www.lamoda.by/p/rtlaam266401/clothes-hebymango-futbolka/",
+        "image": "https://a.lmcdn.ru/img600x866/R/T/RTLAAM266401_14635506_1_v2.jpg",
+        "style": "t_shirt",
+        "colors": [
+            "white"
+        ],
+        "fit": "regular"
+    }
+]
