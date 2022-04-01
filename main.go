@@ -1,11 +1,13 @@
 package main
 
 import (
-	"basis/clothing"
 	"basis/server"
+	"basis/db"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	clothing.LoadClothing()
+	godotenv.Load(".env")
+	db.Connect()
 	server.Start()
 }

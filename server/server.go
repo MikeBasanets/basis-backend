@@ -4,43 +4,51 @@ import (
 	"basis/algorithm"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 func Start() {
 	http.HandleFunc("/", mapRequest)
 	fmt.Println("The server is up")
-    http.ListenAndServe(":8080", nil)
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
 func mapRequest(w http.ResponseWriter, req *http.Request) {
-	if (req.URL.Path == "/" || req.URL.Path == "") {
+	switch cleanedUrl := strings.TrimSuffix(req.URL.Path, "/"); cleanedUrl {
+	case "":
 		handleStartPage(w, req)
-		return
-	}
-	if (req.URL.Path == "/submit-data/" || req.URL.Path == "/submit-data") {
-		handleSubmittedData(w, req)
-		return
+	case "/submit-quiz":
+		handleSubmittedQuiz(w, req)
 	}
 	respondError404(w, req)
 }
 
 func handleStartPage(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	data, _ := json.Marshal("Hello")
-	w.Write(data)
+	http.ServeFile(w, req, "./static/main.html")
 }
 
-func handleSubmittedData(w http.ResponseWriter, req *http.Request) {
+func handleSubmittedQuiz(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	userData := algorithm.UserData{}
-	json.NewDecoder(req.Body).Decode(&userData)
-	var wardrobe, err = algorithm.CalculateWardrobe(userData)
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	quizBody := algorithm.QuizData{}
+	json.NewDecoder(req.Body).Decode(&quizBody)
+	if (quizBody == algorithm.QuizData{}) {
+		fmt.Println(req.URL.Query().Get("birthdayYear"))
+		birthdayYear, err := strconv.Atoi(req.URL.Query().Get("birthdayYear"))
+		if err != nil {
+			quizBody = algorithm.QuizData{Purpose: req.URL.Query().Get("purpose"), BirthdayYear: birthdayYear}
+		}
+	}
+	var wardrobe, err = algorithm.CalculateWardrobe(quizBody)
 	var result []byte
 	if err != nil {
-		result, _ = json.Marshal(err)
+		result, _ = json.Marshal("Bad request")
+		w.WriteHeader(400)
 	} else {
 		result, _ = json.Marshal(wardrobe)
 	}
@@ -50,6 +58,7 @@ func handleSubmittedData(w http.ResponseWriter, req *http.Request) {
 func respondError404(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	fmt.Fprintf(w, "Endpoint not found. Check to see if the submitted URL is correct.");
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	fmt.Fprintf(w, "Endpoint not found. Check to see if the submitted URL is correct.")
 	w.WriteHeader(http.StatusNotFound)
 }
