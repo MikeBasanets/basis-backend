@@ -3,11 +3,11 @@ package db
 import (
 	"context"
 	"fmt"
-	"os"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"os"
 )
 
-var connectionPool * pgxpool.Pool
+var connectionPool *pgxpool.Pool
 
 func Connect() {
 	pool, err := pgxpool.Connect(context.Background(), os.Getenv("BASIS_DB_URL"))

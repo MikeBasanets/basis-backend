@@ -1,8 +1,8 @@
 package main
 
 import (
-	"basis/server"
 	"basis/db"
+	"basis/server"
 	"github.com/joho/godotenv"
 )
 

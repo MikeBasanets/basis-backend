@@ -13,7 +13,8 @@ import (
 func Start() {
 	http.HandleFunc("/", mapRequest)
 	fmt.Println("The server is up")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	go http.ListenAndServe(":80", nil)
+	log.Fatal(http.ListenAndServeTLS(":443", "ssl.crt", "ssl.key", nil))
 }
 
 func mapRequest(w http.ResponseWriter, req *http.Request) {

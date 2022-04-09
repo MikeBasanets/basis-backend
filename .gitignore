@@ -1,3 +1,5 @@
 .env
 pages
 .vscode
+ssl.crt
+ssl.key
