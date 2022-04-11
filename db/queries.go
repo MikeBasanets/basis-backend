@@ -5,7 +5,9 @@ import (
 )
 
 func QueryAllPants() ([]Pants, error) {
-	rows, err := connectionPool.Query(context.Background(), "select id, pageurl, imageurl, color, price from pants")
+	rows, err := connectionPool.Query(context.Background(), `select pageUrl, imageUrl, color, pattern, 
+		description, brand, price, season, subcategory, lastUpdated,
+		fitType, legOpeningCm from pants`)
 	if err != nil {
 		return nil, err
 	}
@@ -14,27 +16,30 @@ func QueryAllPants() ([]Pants, error) {
 	for rows.Next() {
 		var i Pants
 		if err := rows.Scan(
-			&i.ID,
 			&i.PageUrl,
 			&i.ImageUrl,
 			&i.Color,
+			&i.Pattern,
+			&i.Description,
+			&i.Brand,
 			&i.Price,
+			&i.Season,
+			&i.Subcategory,
+			&i.LastUpdated,
+			&i.FitType,
+			&i.LegOpeningCm,
 		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
 	}
-	/*if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}*/
 	return items, nil
 }
 
 func QueryAllShirts() ([]Shirt, error) {
-	rows, err := connectionPool.Query(context.Background(), "select id, pageurl, imageurl, color, price from shirts")
+	rows, err := connectionPool.Query(context.Background(), `select pageUrl, imageUrl, color, pattern,
+		description, brand, price, season, subcategory, lastUpdated,
+		fitType, lengthCm, sleeveLengthCm, collarOrCutout from shirts`)
 	if err != nil {
 		return nil, err
 	}
@@ -43,11 +48,20 @@ func QueryAllShirts() ([]Shirt, error) {
 	for rows.Next() {
 		var i Shirt
 		if err := rows.Scan(
-			&i.ID,
 			&i.PageUrl,
 			&i.ImageUrl,
 			&i.Color,
+			&i.Pattern,
+			&i.Description,
+			&i.Brand,
 			&i.Price,
+			&i.Season,
+			&i.Subcategory,
+			&i.LastUpdated,
+			&i.FitType,
+			&i.LengthCm,
+			&i.SleeveLengthCm,
+			&i.CollarOrCutout,
 		); err != nil {
 			return nil, err
 		}
@@ -57,7 +71,9 @@ func QueryAllShirts() ([]Shirt, error) {
 }
 
 func QueryAllOuterwear() ([]Outerwear, error) {
-	rows, err := connectionPool.Query(context.Background(), "select id, pageurl, imageurl, color, price, warmth from outerwear")
+	rows, err := connectionPool.Query(context.Background(), `select pageUrl, imageUrl, color, pattern,
+		description, brand, price, season, subcategory, lastUpdated,
+		hoodType, lengthCm, sleeveLengthCm, insulationComposition from outerwear`)
 	if err != nil {
 		return nil, err
 	}
@@ -66,12 +82,20 @@ func QueryAllOuterwear() ([]Outerwear, error) {
 	for rows.Next() {
 		var i Outerwear
 		if err := rows.Scan(
-			&i.ID,
 			&i.PageUrl,
 			&i.ImageUrl,
 			&i.Color,
+			&i.Pattern,
+			&i.Description,
+			&i.Brand,
 			&i.Price,
-			&i.Warmth,
+			&i.Season,
+			&i.Subcategory,
+			&i.LastUpdated,
+			&i.HoodType,
+			&i.LengthCm,
+			&i.SleeveLengthCm,
+			&i.InsulationComposition,
 		); err != nil {
 			return nil, err
 		}

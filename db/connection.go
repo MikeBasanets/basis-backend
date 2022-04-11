@@ -2,9 +2,10 @@ package db
 
 import (
 	"context"
-	"fmt"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"log"
 	"os"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var connectionPool *pgxpool.Pool
@@ -12,8 +13,11 @@ var connectionPool *pgxpool.Pool
 func Connect() {
 	pool, err := pgxpool.Connect(context.Background(), os.Getenv("BASIS_DB_URL"))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		os.Exit(1)
+		log.Fatalln("Unable to connect to database: ", err)
 	}
 	connectionPool = pool
+}
+
+func Disconnect() {
+	connectionPool.Close()
 }

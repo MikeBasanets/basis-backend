@@ -5,8 +5,12 @@ import (
 )
 
 type QuizData struct {
-	Purpose      string `json:"purpose"`
-	BirthdayYear int    `json:"birthdayYear"`
+	Designation          string
+	Age                  int
+	Budget               int
+	HairColor            string
+	FavouriteColorScheme string
+	PreferredFit         string
 }
 
 type Wardrobe struct {

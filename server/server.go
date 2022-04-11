@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 )
@@ -13,53 +14,61 @@ import (
 func Start() {
 	http.HandleFunc("/", mapRequest)
 	fmt.Println("The server is up")
-	go http.ListenAndServe(":80", nil)
-	log.Fatal(http.ListenAndServeTLS(":443", "ssl.crt", "ssl.key", nil))
+	log.Fatalln(http.ListenAndServeTLS(":443", "ssl.crt", "ssl.key", nil))
 }
 
 func mapRequest(w http.ResponseWriter, req *http.Request) {
-	switch cleanedUrl := strings.TrimSuffix(req.URL.Path, "/"); cleanedUrl {
-	case "":
-		handleStartPage(w, req)
+	switch trimmedUrl := strings.TrimSuffix(req.URL.Path, "/"); trimmedUrl {
 	case "/submit-quiz":
 		handleSubmittedQuiz(w, req)
+	default:
+		respondError404(w, req)
 	}
-	respondError404(w, req)
-}
-
-func handleStartPage(w http.ResponseWriter, req *http.Request) {
-	http.ServeFile(w, req, "./static/main.html")
 }
 
 func handleSubmittedQuiz(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-	w.Header().Set("Access-Control-Allow-Methods", "POST")
-	quizBody := algorithm.QuizData{}
-	json.NewDecoder(req.Body).Decode(&quizBody)
-	if (quizBody == algorithm.QuizData{}) {
-		fmt.Println(req.URL.Query().Get("birthdayYear"))
-		birthdayYear, err := strconv.Atoi(req.URL.Query().Get("birthdayYear"))
-		if err != nil {
-			quizBody = algorithm.QuizData{Purpose: req.URL.Query().Get("purpose"), BirthdayYear: birthdayYear}
-		}
+	w.Header().Set("Access-Control-Allow-Methods", "GET")
+	quizData, err := parseQuizData(req.URL)
+	if err != nil {
+		result, _ := json.Marshal("Incorrect input format")
+		w.WriteHeader(400)
+		w.Write(result)
+		return
 	}
-	var wardrobe, err = algorithm.CalculateWardrobe(quizBody)
+	wardrobe, err := algorithm.CalculateWardrobe(quizData)
 	var result []byte
 	if err != nil {
-		result, _ = json.Marshal("Bad request")
-		w.WriteHeader(400)
+		result, _ = json.Marshal("Internal error")
+		w.WriteHeader(500)
 	} else {
 		result, _ = json.Marshal(wardrobe)
 	}
 	w.Write(result)
 }
 
+func parseQuizData(url *url.URL) (algorithm.QuizData, error) {
+	result := algorithm.QuizData{}
+	var err error
+	result.Age, err = strconv.Atoi(url.Query().Get("age"))
+	if err != nil {
+		return algorithm.QuizData{}, err
+	}
+	result.Budget, err = strconv.Atoi(url.Query().Get("budget"))
+	if err != nil {
+		return algorithm.QuizData{}, err
+	}
+	result.Designation = url.Query().Get("designation")
+	result.HairColor = url.Query().Get("hairColor")
+	result.FavouriteColorScheme = url.Query().Get("favouriteColorScheme")
+	result.PreferredFit = url.Query().Get("preferredFit")
+	return result, nil
+}
+
 func respondError404(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	fmt.Fprintf(w, "Endpoint not found. Check to see if the submitted URL is correct.")
 	w.WriteHeader(http.StatusNotFound)
 }
