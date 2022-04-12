@@ -9,7 +9,7 @@ type QuizData struct {
 	Age                  int
 	Budget               int
 	HairColor            string
-	FavouriteColorScheme string
+	FavoriteColorScheme string
 	PreferredFit         string
 }
 

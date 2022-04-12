@@ -61,7 +61,7 @@ func parseQuizData(url *url.URL) (algorithm.QuizData, error) {
 	}
 	result.Designation = url.Query().Get("designation")
 	result.HairColor = url.Query().Get("hairColor")
-	result.FavouriteColorScheme = url.Query().Get("favouriteColorScheme")
+	result.FavoriteColorScheme = url.Query().Get("favoriteColorScheme")
 	result.PreferredFit = url.Query().Get("preferredFit")
 	return result, nil
 }
