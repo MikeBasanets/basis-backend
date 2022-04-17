@@ -49,11 +49,11 @@ jobs:
           scp  -o StrictHostKeyChecking=no -r my-binary ${{ secrets.PRODUCTION_USERNAME }}@${{ secrets.PRODUCTION_HOST }}:./my-binary.new
           ssh -o StrictHostKeyChecking=no ${{ secrets.PRODUCTION_USERNAME }}@${{ secrets.PRODUCTION_HOST }} << 'ENDSSH'
             echo "** restarting service tof apply new version **"
-            sudo service my-binary stop
+            sudo killall my-binary
             echo "** service stopped **"
             mv my-binary.new my-binary
             chmod +x my-binary
-            sudo service my-binary start
+            sudo ./my-binary &
             echo "** service started **"
             ps -ef |grep my-binary
           ENDSSH          
