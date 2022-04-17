@@ -47,13 +47,13 @@ jobs:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
           scp  -o StrictHostKeyChecking=no -r my-binary ${{ secrets.PRODUCTION_USERNAME }}@${{ secrets.PRODUCTION_HOST }}:./my-binary.new
-          ssh -o StrictHostKeyChecking=no ${{ secrets.PRODUCTION_USERNAME }}@${{ secrets.PRODUCTION_HOST }} << 'ENDSSH'
-            echo "** restarting service tof apply new version **"
-            sudo killall my-binary
-            echo "** service stopped **"
-            mv my-binary.new my-binary
-            chmod +x my-binary
-            nohup ./my-binary &
-            echo "** service started **"
-            ps -ef |grep my-binary
-          exit          
+ssh -o StrictHostKeyChecking=no ${{ secrets.PRODUCTION_USERNAME }}@${{ secrets.PRODUCTION_HOST }} << 'ENDSSH'
+echo "** restarting service tof apply new version **"
+sudo killall my-binary
+echo "** service stopped **"
+mv my-binary.new my-binary
+chmod +x my-binary
+nohup ./my-binary &
+echo "** service started **"
+ps -ef |grep my-binary
+ENDSSH
