@@ -56,4 +56,4 @@ jobs:
             sudo ./my-binary &
             echo "** service started **"
             ps -ef |grep my-binary
-          ENDSSH          
+          exit          
