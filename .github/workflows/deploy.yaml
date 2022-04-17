@@ -16,7 +16,7 @@ jobs:
           go-version: 1.18
 
       - name: Build it
-        run: GOOS=linux GOARCH=amd64 go build -o my-binary cmd/service/main.go
+        run: GOOS=linux GOARCH=amd64 go build -o my-binary main.go
 
       - name: Test it
         run: go test -v ./...
