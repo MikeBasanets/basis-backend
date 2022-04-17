@@ -53,7 +53,7 @@ jobs:
             echo "** service stopped **"
             mv my-binary.new my-binary
             chmod +x my-binary
-            sudo ./my-binary &
+            nohup ./my-binary &
             echo "** service started **"
             ps -ef |grep my-binary
           exit          
