@@ -90,9 +90,10 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
+	expirationTime := 100000 * time.Hour
 	token, err := jwt.NewBuilder().
 		IssuedAt(time.Now()).
-		Expiration(time.Now().Add(5*time.Minute)).
+		Expiration(time.Now().Add(expirationTime)).
 		Claim("username", creds.Username).
 		Build()
 	if err != nil {
@@ -107,7 +108,7 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:    "access_token",
 		Value:   string(signedToken),
-		Expires: time.Now().Add(100000 * time.Hour),
+		Expires: time.Now().Add(expirationTime),
 	})
 }
 
