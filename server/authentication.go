@@ -36,6 +36,9 @@ type Credentials struct {
 }
 
 func signUp(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
 	var creds Credentials
 	bodyBytes, _ := ioutil.ReadAll(r.Body)
 	r.Body.Close()
@@ -71,6 +74,9 @@ func signUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func signIn(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
 	var creds Credentials
 	err := json.NewDecoder(r.Body).Decode(&creds)
 	if err != nil {
@@ -93,7 +99,7 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	signedToken, err := jwt.Sign(token, jwt.WithKey(jwa.RS256, jwtKey)) //os.Getenv("JWT_KEY")
+	signedToken, err := jwt.Sign(token, jwt.WithKey(jwa.RS256, jwtKey))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
