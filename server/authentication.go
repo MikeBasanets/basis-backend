@@ -3,12 +3,11 @@ package server
 import (
 	"basis/db"
 	"bytes"
-	"crypto/rand"
-	"crypto/rsa"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"regexp"
 	"time"
 
@@ -16,14 +15,6 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
-
-var jwtKey * rsa.PrivateKey
-
-func init() {
-	key, _ := rsa.GenerateKey(rand.Reader, 2048)
-	jwtKey = key
-}
-
 
 type Credentials struct {
 	Username string `json:"username"`
@@ -88,7 +79,7 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	signedToken, err := jwt.Sign(token, jwt.WithKey(jwa.RS256, jwtKey)) //os.Getenv("JWT_KEY")
+	signedToken, err := jwt.Sign(token, jwt.WithKey(jwa.RS256, os.Getenv("JWT_KEY")))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -101,10 +92,10 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func validateTokenAndExtractUsername(token []byte) (string, error) {
-	verifiedToken, err := jwt.Parse(token, jwt.WithKey(jwa.RS256, jwtKey))
+	verifiedToken, err := jwt.Parse(token, jwt.WithKey(jwa.RS256, os.Getenv("JWT_KEY")))
 	if err != nil {
 		return "", err
 	}
-	username := fmt.Sprintf("%v", verifiedToken.PrivateClaims()["username"]) //wtf
+	username := fmt.Sprintf("%v", verifiedToken.PrivateClaims()["username"])
 	return username, nil
 }
