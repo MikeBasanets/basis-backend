@@ -9,6 +9,7 @@ import (
 
 func main() {
 	godotenv.Load(".env")
+	server.InitJwtKey()
 	db.Connect()
 	server.Start()
 }

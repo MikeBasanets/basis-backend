@@ -3,18 +3,32 @@ package server
 import (
 	"basis/db"
 	"bytes"
+	"crypto/rsa"
+	"crypto/x509"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
+
+var jwtKey *rsa.PrivateKey
+
+func InitJwtKey() {
+	pemString := os.Getenv("JWT_KEY")
+	pemString = strings.ReplaceAll(pemString, `\n`, "\n")
+	block, _ := pem.Decode([]byte(pemString))
+	key, _ := x509.ParsePKCS1PrivateKey(block.Bytes)
+	jwtKey = key
+}
 
 type Credentials struct {
 	Username string `json:"username"`
@@ -79,7 +93,7 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	signedToken, err := jwt.Sign(token, jwt.WithKey(jwa.RS256, os.Getenv("JWT_KEY")))
+	signedToken, err := jwt.Sign(token, jwt.WithKey(jwa.RS256, jwtKey)) //os.Getenv("JWT_KEY")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -92,7 +106,7 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func validateTokenAndExtractUsername(token []byte) (string, error) {
-	verifiedToken, err := jwt.Parse(token, jwt.WithKey(jwa.RS256, os.Getenv("JWT_KEY")))
+	verifiedToken, err := jwt.Parse(token, jwt.WithKey(jwa.RS256, jwtKey))
 	if err != nil {
 		return "", err
 	}
