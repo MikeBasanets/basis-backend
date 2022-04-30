@@ -1,15 +1,16 @@
 package algorithm
 
 import (
+	"basis/db"
 	"errors"
 	"math/rand"
 	"time"
 )
 
-func makeAnyWardrobe() (Wardrobe, error) {
+func makeAnyWardrobe() (db.Wardrobe, error) {
 	wardrobe, err := LoadClothing()
 	if err != nil {
-		return Wardrobe{}, err
+		return db.Wardrobe{}, err
 	}
 	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(wardrobe.Pants), func(i, j int) {
@@ -27,10 +28,10 @@ func makeAnyWardrobe() (Wardrobe, error) {
 	return wardrobe, nil
 }
 
-func CalculateWardrobe(q QuizData) (Wardrobe, error) {
+func CalculateWardrobe(q db.QuizData) (db.Wardrobe, error) {
 	if q.Age >= 0 && q.Age < 255 && len(q.Designation) >= 3 && len(q.Designation) <= 15 {
 		return makeAnyWardrobe()
 	} else {
-		return Wardrobe{}, errors.New("Wrong parameters")
+		return db.Wardrobe{}, errors.New("Wrong parameters")
 	}
 }

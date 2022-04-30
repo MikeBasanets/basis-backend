@@ -36,3 +36,25 @@ type Shirt struct {
 	SleeveLengthCm int    `json:"-"`
 	CollarOrCutout string `json:"-"`
 }
+
+type User struct {
+	Id           int64
+	Username     string
+	PasswordHash string
+	LastActive   time.Time
+}
+
+type QuizData struct {
+	Designation         string
+	Age                 int
+	Budget              int
+	HairColor           string
+	FavoriteColorScheme string
+	PreferredFit        string
+}
+
+type Wardrobe struct {
+	Pants     []Pants     `json:"pants"`
+	Shirts    []Shirt     `json:"shirts"`
+	Outerwear []Outerwear `json:"outerwear"`
+}

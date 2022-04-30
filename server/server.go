@@ -2,28 +2,22 @@ package server
 
 import (
 	"basis/algorithm"
+	"basis/db"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 )
 
 func Start() {
-	http.HandleFunc("/", mapRequest)
+	http.HandleFunc("/submit-quiz", handleSubmittedQuiz)
+	http.HandleFunc("/sign-in", signIn)
+	http.HandleFunc("/sign-up", signUp)
+	http.HandleFunc("/history", accessHistory)
 	fmt.Println("The server is up")
 	log.Fatalln(http.ListenAndServeTLS(":443", "ssl.crt", "ssl.key", nil))
-}
-
-func mapRequest(w http.ResponseWriter, req *http.Request) {
-	switch trimmedUrl := strings.TrimSuffix(req.URL.Path, "/"); trimmedUrl {
-	case "/submit-quiz":
-		handleSubmittedQuiz(w, req)
-	default:
-		respondError404(w, req)
-	}
 }
 
 func handleSubmittedQuiz(w http.ResponseWriter, req *http.Request) {
@@ -46,29 +40,55 @@ func handleSubmittedQuiz(w http.ResponseWriter, req *http.Request) {
 		result, _ = json.Marshal(wardrobe)
 	}
 	w.Write(result)
+	tokenCookie, err := req.Cookie("access_token")
+	if err != nil {
+		return
+	}
+	username, err := validateTokenAndExtractUsername([]byte(tokenCookie.Value))
+	if err != nil {
+		return
+	}
+	db.SaveResult(wardrobe, username)
 }
 
-func parseQuizData(url *url.URL) (algorithm.QuizData, error) {
-	result := algorithm.QuizData{}
+func accessHistory(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET")
+	tokenCookie, err := req.Cookie("access_token")
+	if err != nil {
+		w.WriteHeader(400)
+		return
+	}
+	username, err := validateTokenAndExtractUsername([]byte(tokenCookie.Value))
+	if err != nil {
+		w.WriteHeader(403)
+		return
+	}
+	history, err := db.QueryResultsByDateByUsername(username)
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
+	var result []byte
+	result, _ = json.Marshal(history)
+	w.Write(result)
+}
+
+func parseQuizData(url *url.URL) (db.QuizData, error) {
+	result := db.QuizData{}
 	var err error
 	result.Age, err = strconv.Atoi(url.Query().Get("age"))
 	if err != nil {
-		return algorithm.QuizData{}, err
+		return db.QuizData{}, err
 	}
 	result.Budget, err = strconv.Atoi(url.Query().Get("budget"))
 	if err != nil {
-		return algorithm.QuizData{}, err
+		return db.QuizData{}, err
 	}
 	result.Designation = url.Query().Get("designation")
 	result.HairColor = url.Query().Get("hairColor")
 	result.FavoriteColorScheme = url.Query().Get("favoriteColorScheme")
 	result.PreferredFit = url.Query().Get("preferredFit")
 	return result, nil
-}
-
-func respondError404(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "text/plain")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	fmt.Fprintf(w, "Endpoint not found. Check to see if the submitted URL is correct.")
-	w.WriteHeader(http.StatusNotFound)
 }
